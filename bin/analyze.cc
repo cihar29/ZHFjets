@@ -24,6 +24,7 @@ void setPars(const string& parFile);
 map<TString, TH1*> m_Histos1D;
 map<TString, TH2*> m_Histos2D;
 
+bool isMC;
 TString inName, outName;
 string channel;
 double weight0, weight;
@@ -53,20 +54,21 @@ int main(int argc, char* argv[]) {
   TFile* inFile = TFile::Open(inName);
   TTree* T = (TTree*) inFile->Get("tree");
   Long64_t nEntries = T->GetEntries();
-  cout << endl << nEntries << " Events" << endl;
+  cout << nEntries << " Events" << endl;
   cout << "Processing " + inName << endl;
   cout << "Channel: " + channel << endl;
 
   //Cuts//
 
   enum Cuts{
-    channelcut, trigcut, selcut, zjetmasscut, njetcut, metcut, hfjetcut, numCuts
+    channelcut, trigcut, selcut, zjetmasscut, njetcut, metcut, bjet, cjet, ljet, hfbjet, hfcjet, hfljet, numCuts
   };
   vector<pair<string, double> > v_cuts(numCuts);
 
   v_cuts[channelcut]=make_pair("Channel",0.); v_cuts[trigcut]=make_pair("Trigger",0.); v_cuts[selcut]=make_pair("Selection",0.);
   v_cuts[zjetmasscut]=make_pair("Z-Jet Mass",0.); v_cuts[njetcut]=make_pair("nJet",0.); v_cuts[metcut]=make_pair("MET",0.);
-  v_cuts[hfjetcut]=make_pair("HF Jet",0.);
+  v_cuts[bjet]=make_pair("bJet",0.); v_cuts[cjet]=make_pair("cJet",0.); v_cuts[ljet]=make_pair("lJet",0.);
+  v_cuts[hfbjet]=make_pair("HF bJet",0.); v_cuts[hfcjet]=make_pair("HF cJet",0.); v_cuts[hfljet]=make_pair("HF lJet",0.);
 
   //Histograms//
 /*
@@ -149,15 +151,17 @@ int main(int argc, char* argv[]) {
   T->SetBranchAddress("Vtype_new", &Vtype_new);
 
   int nJet=MAXJET;
-  int idxJet_passCSV_SVT[2];
-  float Jet_pt[nJet], Jet_eta[nJet], Jet_gcc_weight[nJet], Jet_gbb_weight[nJet];
+  int idxJet_passCSV_SVT[2], Jet_hadronFlavour[nJet];
+  float Jet_pt[nJet], Jet_eta[nJet];
 
   T->SetBranchAddress("nJet", &nJet);
   T->SetBranchAddress("idxJet_passCSV_SVT", idxJet_passCSV_SVT);
   T->SetBranchAddress("Jet_pt", Jet_pt);
   T->SetBranchAddress("Jet_eta", Jet_eta);
-  T->SetBranchAddress("Jet_gcc_weight", Jet_gcc_weight);
-  T->SetBranchAddress("Jet_gbb_weight", Jet_gbb_weight);
+
+  if (isMC) {
+    T->SetBranchAddress("Jet_hadronFlavour", Jet_hadronFlavour);
+  }
 
   float met_pt;
 
@@ -222,12 +226,25 @@ int main(int argc, char* argv[]) {
     if (met_pt > 40) continue;
     v_cuts[metcut].second += weight;
 
-    int idx = idxJet_passCSV_SVT[1];
-    if (idx < 0) continue;
-    if (Jet_pt[idx] < 30 || fabs(Jet_eta[idx]) > 2.4) continue;
-    if (Jet_gcc_weight[idx] > 1.1 || Jet_gbb_weight[idx] > 1.1) continue;
+    if (!isMC) continue;
 
-    v_cuts[hfjetcut].second += weight;
+    int idx = idxJet_passCSV_SVT[1];
+    if (idx < 0) { //not HF
+      idx = 0;
+
+      if (Jet_pt[idx]<30 || fabs(Jet_eta[idx])>2.4) continue;
+
+      if      (Jet_hadronFlavour[idx] == 5) v_cuts[bjet].second += weight;
+      else if (Jet_hadronFlavour[idx] == 4) v_cuts[cjet].second += weight;
+      else                                  v_cuts[ljet].second += weight;
+    }
+    else {         //HF
+      if (Jet_pt[idx]<30 || fabs(Jet_eta[idx])>2.4) continue;
+
+      if      (Jet_hadronFlavour[idx] == 5) v_cuts[hfbjet].second += weight;
+      else if (Jet_hadronFlavour[idx] == 4) v_cuts[hfcjet].second += weight;
+      else                                  v_cuts[hfljet].second += weight;
+    }
   }
   cout << difftime(time(NULL), start) << " s" << endl;
 
@@ -244,9 +261,16 @@ int main(int argc, char* argv[]) {
     if (i == 0)
       cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
                    v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[0].second) << endl;
+
+    else if (i>metcut)
+      cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
+                   v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[metcut].second) << endl;
     else
       cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
                    v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[i-1].second) << endl;
+
+   if (i==metcut || i==ljet)
+      cout << "---------------------------------------------------------------------------------------------------" << endl;
 
     //cuts->SetBinContent(i+1, v_cuts[i].second);
     //cuts->GetXaxis()->SetBinLabel(i+1,Form("%i",i+1));
@@ -360,7 +384,11 @@ void setPars(const string& parFile) {
     while (line.at(0) == ' ') line.erase(0, 1);
     while (line.at(line.length()-1) == ' ') line.erase(line.length()-1, line.length());
 
-    if      (var == "inName")  inName = line.data();
+    if (var == "isMC") {
+      if (line == "true") isMC = true;
+      else isMC = false;
+    }
+    else if (var == "inName")  inName = line.data();
     else if (var == "outName") outName = line.data();
     else if (var == "channel") channel = line;
   }
