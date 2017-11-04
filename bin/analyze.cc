@@ -21,20 +21,13 @@ using namespace std;
 void setPars(const string& parFile); 
 //void setWeight(const string& parFile); 
 
-map<TString, TH1*> m_Histos1D;
-map<TString, TH2*> m_Histos2D;
-
 bool isMC;
-TString inName, outName;
+TString inName;
 string channel;
 double weight0, weight;
 
 const int MAXJET = 50;
 const int MAXLEP = 2;
-//const float MUONMASS = 0.10566;
-//const float ELEMASS = 0.;
-//const float btagWP_L = 0.5426;
-//const float btagWP_M = 0.8484;
 
 int main(int argc, char* argv[]) {
 
@@ -61,68 +54,15 @@ int main(int argc, char* argv[]) {
   //Cuts//
 
   enum Cuts{
-    channelcut, trigcut, selcut, zjetmasscut, njetcut, metcut, bjet, cjet, ljet, hfbjet, hfcjet, hfljet, numCuts
+    channelcut, trigcut, selcut, zjetmasscut, metcut, jetcut, bjet, cjet, ljet, genjetcut, bgenjet, cgenjet, lgenjet, numCuts
   };
   vector<pair<string, double> > v_cuts(numCuts);
 
   v_cuts[channelcut]=make_pair("Channel",0.); v_cuts[trigcut]=make_pair("Trigger",0.); v_cuts[selcut]=make_pair("Selection",0.);
-  v_cuts[zjetmasscut]=make_pair("Z-Jet Mass",0.); v_cuts[njetcut]=make_pair("nJet",0.); v_cuts[metcut]=make_pair("MET",0.);
-  v_cuts[bjet]=make_pair("bJet",0.); v_cuts[cjet]=make_pair("cJet",0.); v_cuts[ljet]=make_pair("lJet",0.);
-  v_cuts[hfbjet]=make_pair("HF bJet",0.); v_cuts[hfcjet]=make_pair("HF cJet",0.); v_cuts[hfljet]=make_pair("HF lJet",0.);
+  v_cuts[zjetmasscut]=make_pair("Z-Jet Mass",0.); v_cuts[jetcut]=make_pair("GoodJet",0.); v_cuts[metcut]=make_pair("MET",0.);
+  v_cuts[bjet]=make_pair("bJet",0.); v_cuts[cjet]=make_pair("cJet",0.); v_cuts[ljet]=make_pair("lJet",0.); v_cuts[genjetcut]=make_pair("GoodGenJet",0.);
+  v_cuts[bgenjet]=make_pair("bgenjet",0.); v_cuts[cgenjet]=make_pair("cgenjet",0.); v_cuts[lgenjet]=make_pair("lgenjet",0.);
 
-  //Histograms//
-/*
-  int nDirs = 2;
-  for (int i=0; i<nDirs; i++) {
-    TString hname = Form("%i_lep0pt",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,200,0,200);
-    hname = Form("%i_lep1pt",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,200,0,200);
-    hname = Form("%i_lep0eta",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,60,-3,3);
-    hname = Form("%i_lep1eta",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,60,-3,3);
-    hname = Form("%i_lep0phi",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,60,-3.2,3.2);
-    hname = Form("%i_lep1phi",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,60,-3.2,3.2);
-    hname = Form("%i_lep0iso03",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,100,0,1);
-    hname = Form("%i_lep1iso03",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,100,0,1);
-    hname = Form("%i_lep0iso04",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,100,0,1);
-    hname = Form("%i_lep1iso04",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,100,0,1);
-
-    hname = Form("%i_jet_pt",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,200,0,200);
-    hname = Form("%i_jet_eta",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,60,-3,3);
-    hname = Form("%i_jet_phi",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,60,-3.2,3.2);
-    hname = Form("%i_jet_csv",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,1000,0,1);
-    hname = Form("%i_jet_vtxmass",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,100,0,10);
-    hname = Form("%i_njet",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,10,0,10);
-    hname = Form("%i_njet_csvm_vtxmass",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,10,0,10);
-
-    hname = Form("%i_V_pt",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
-    hname = Form("%i_V_eta",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,60,-3,3);
-    hname = Form("%i_V_phi",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,60,-3.2,3.2);
-    hname = Form("%i_V_mass",i);
-    m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
-
-//    hname = Form("%i_V_pt_jet_pt",i);
-//    m_Histos2D[hname] = new TH2D(hname,hname,9,{30, 35, 40, 50, 60, 80, 110, 140, 200},9,{0, 20, 30, 40, 50, 70, 90, 120, 200});
-  }
-*/
   //Set Branches//
 
   int HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v, HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v,
@@ -150,17 +90,32 @@ int main(int argc, char* argv[]) {
   T->SetBranchAddress("vLeptons_new_etaSc", vLeptons_new_etaSc);
   T->SetBranchAddress("Vtype_new", &Vtype_new);
 
-  int nJet=MAXJET;
+  int nJet = MAXJET;
   int idxJet_passCSV_SVT[2], Jet_hadronFlavour[nJet];
-  float Jet_pt[nJet], Jet_eta[nJet];
+  float Jet_pt[nJet], Jet_eta[nJet], Jet_phi[nJet], Jet_mass[nJet];
 
   T->SetBranchAddress("nJet", &nJet);
   T->SetBranchAddress("idxJet_passCSV_SVT", idxJet_passCSV_SVT);
   T->SetBranchAddress("Jet_pt", Jet_pt);
   T->SetBranchAddress("Jet_eta", Jet_eta);
+  T->SetBranchAddress("Jet_phi", Jet_phi);
+  T->SetBranchAddress("Jet_mass", Jet_mass);
+
+  int nGenJet = MAXJET;
+  int GenJet_numBHadrons[nGenJet], GenJet_numCHadrons[nGenJet]; //GenJet_pdgId[nGenJet];
+  float GenJet_pt[nGenJet], GenJet_eta[nGenJet], GenJet_phi[nGenJet], GenJet_mass[nGenJet];
 
   if (isMC) {
     T->SetBranchAddress("Jet_hadronFlavour", Jet_hadronFlavour);
+
+    T->SetBranchAddress("nGenJet", &nGenJet);
+    T->SetBranchAddress("GenJet_pt", GenJet_pt);
+    T->SetBranchAddress("GenJet_eta", GenJet_eta);
+    T->SetBranchAddress("GenJet_phi", GenJet_phi);
+    T->SetBranchAddress("GenJet_mass", GenJet_mass);
+    //T->SetBranchAddress("GenJet_pdgId", GenJet_pdgId);
+    T->SetBranchAddress("GenJet_numBHadrons", GenJet_numBHadrons);
+    T->SetBranchAddress("GenJet_numCHadrons", GenJet_numCHadrons);
   }
 
   float met_pt;
@@ -216,39 +171,79 @@ int main(int argc, char* argv[]) {
     if (V_mass<70 || V_mass>110) continue;
     v_cuts[zjetmasscut].second += weight;
 
-    int nGoodJet = 0;
-    for (int i=0; i<nJet; i++) {
-      if (Jet_pt[i]>30 && fabs(Jet_eta[i])<2.4) nGoodJet++;
-    }
-    if (nGoodJet < 1) continue;
-    v_cuts[njetcut].second += weight;
-
     if (met_pt > 40) continue;
     v_cuts[metcut].second += weight;
 
-    if (!isMC) continue;
+    map<int, int> genjet_jet_idx;
+    int hfidx = idxJet_passCSV_SVT[1], genhfidx = -1;
 
-    int idx = idxJet_passCSV_SVT[1];
-    if (idx < 0) { //not HF
-      idx = 0;
+    for (int i=0; i<nJet; i++) {
+      TLorentzVector jet;
+      jet.SetPtEtaPhiM(Jet_pt[i], Jet_eta[i], Jet_phi[i], Jet_mass[i]);
 
-      if (Jet_pt[idx]<30 || fabs(Jet_eta[idx])>2.4) continue;
+      double rmin = 99.;
+      int matched_idx = -1;
 
-      if      (Jet_hadronFlavour[idx] == 5) v_cuts[bjet].second += weight;
-      else if (Jet_hadronFlavour[idx] == 4) v_cuts[cjet].second += weight;
-      else                                  v_cuts[ljet].second += weight;
+      for (int j=0; j<nGenJet; j++) {
+        if (genjet_jet_idx.find(j) != genjet_jet_idx.end()) continue;  //this genjet is already matched to a jet
+
+        TLorentzVector genJet;
+        genJet.SetPtEtaPhiM(GenJet_pt[j], GenJet_eta[j], GenJet_phi[j], GenJet_mass[j]);
+
+        double dR = jet.DeltaR(genJet);
+        if ( dR<rmin && dR<0.2 ) {
+          rmin = dR;
+          matched_idx = j;
+        }
+      }
+      if (matched_idx != -1) genjet_jet_idx[matched_idx] = i;
+      if (hfidx == i)        genhfidx = matched_idx;
     }
-    else {         //HF
-      if (Jet_pt[idx]<30 || fabs(Jet_eta[idx])>2.4) continue;
 
-      if      (Jet_hadronFlavour[idx] == 5) v_cuts[hfbjet].second += weight;
-      else if (Jet_hadronFlavour[idx] == 4) v_cuts[hfcjet].second += weight;
-      else                                  v_cuts[hfljet].second += weight;
+    //loop over matched jets
+    bool goodJet = false;
+    for (int i=0; i<nJet; i++) {
+
+      bool matched = false;
+      for (auto const& m : genjet_jet_idx) {
+        if (i==m.second) {matched = true; break;}
+      }
+      if ( matched && Jet_pt[i]>30 && fabs(Jet_eta[i])<2.4 ) {goodJet = true; break;}
+    }
+    if (goodJet) {
+      v_cuts[jetcut].second += weight;
+
+      if (hfidx >=0 ) {
+        if (Jet_pt[hfidx]<30 || fabs(Jet_eta[hfidx])>2.4) continue;
+
+        if      (Jet_hadronFlavour[hfidx] == 5) v_cuts[bjet].second += weight;
+        else if (Jet_hadronFlavour[hfidx] == 4) v_cuts[cjet].second += weight;
+        else                                    v_cuts[ljet].second += weight;
+      }
+    }
+
+    //loop over matched genjets
+    bool goodGenJet = false;
+    for (int j=0; j<nGenJet; j++) {
+      if (genjet_jet_idx.find(j) == genjet_jet_idx.end()) continue;
+
+      if ( GenJet_pt[j]>30 && fabs(GenJet_eta[j])<2.4 ) {goodGenJet = true; break;}
+    }
+    if (goodGenJet) {
+      v_cuts[genjetcut].second += weight;
+
+      if (genhfidx >=0 ) {
+        if (GenJet_pt[genhfidx]<30 || fabs(GenJet_eta[genhfidx])>2.4) continue;
+
+        //if      (abs(GenJet_pdgId[genhfidx]) == 5) v_cuts[bgenjet].second += weight;
+        //else if (abs(GenJet_pdgId[genhfidx]) == 4) v_cuts[cgenjet].second += weight;
+        if      (GenJet_numBHadrons[genhfidx] >= 1) v_cuts[bgenjet].second += weight;
+        else if (GenJet_numCHadrons[genhfidx] >= 1) v_cuts[cgenjet].second += weight;
+        else                                        v_cuts[lgenjet].second += weight;
+      }
     }
   }
   cout << difftime(time(NULL), start) << " s" << endl;
-
-  //TH1D* cuts = new TH1D("cuts","cuts",numCuts,-0.5,float(numCuts)-0.5);
 
   //Cutflow Table//
   cout<<"===================================================================================================\n";
@@ -262,76 +257,22 @@ int main(int argc, char* argv[]) {
       cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
                    v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[0].second) << endl;
 
-    else if (i>metcut)
+    else if (i>genjetcut)
       cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
-                   v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[metcut].second) << endl;
+                   v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[genjetcut].second) << endl;
+    else if (i>jetcut)
+      cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
+                   v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[jetcut].second) << endl;
     else
       cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
                    v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[i-1].second) << endl;
 
    if (i==metcut || i==ljet)
       cout << "---------------------------------------------------------------------------------------------------" << endl;
-
-    //cuts->SetBinContent(i+1, v_cuts[i].second);
-    //cuts->GetXaxis()->SetBinLabel(i+1,Form("%i",i+1));
   }
   cout << endl;
-
-  //Write Histograms//
-/*
-  TFile* outFile = new TFile(outName,"RECREATE");
-  outFile->cd();
-
-  cuts->Write();
-
-  for (int i=0; i<nDirs; i++) outFile->mkdir( Form("%i/", i) );
-
-  for (map<TString, TH1*>::iterator hid = m_Histos1D.begin(); hid != m_Histos1D.end(); hid++) {
-    outFile->cd();
-    TString prefix = hid->first(0, 1);
-
-    if ( prefix.IsDigit() ) outFile->cd(outName + ":/" + prefix);
-
-    hid->second->Write();
-  }
-  for (map<TString, TH2*>::iterator hid = m_Histos2D.begin(); hid != m_Histos2D.end(); hid++) {
-    outFile->cd();
-    TString prefix = hid->first(0, 1);
-
-    if ( prefix.IsDigit() ) outFile->cd(outName + ":/" + prefix);
-
-    hid->second->Write();
-  }
-
-  outFile->Write();
-  delete outFile;
-  outFile = 0;
-*/
 }
 /*
-void FillHist1D(const TString& histName, const Double_t& value, const double& weight) {
-  map<TString, TH1*>::iterator hid=m_Histos1D.find(histName);
-  if (hid==m_Histos1D.end())
-    cout << "%FillHist1D -- Could not find histogram with name: " << histName << endl;
-  else
-    hid->second->Fill(value, weight);
-}
-
-void FillHist2D(const TString& histName, const Double_t& value1, const Double_t& value2, const double& weight) {
-  map<TString, TH2*>::iterator hid=m_Histos2D.find(histName);
-  if (hid==m_Histos2D.end())
-    cout << "%FillHist2D -- Could not find histogram with name: " << histName << endl;
-  else
-    hid->second->Fill(value1, value2, weight);
-}
-
-void FillHists(const TString& prefix, const int& nEle, const int& nGoodEle, const int& nMuon, const int& nGoodMuon, const int& nJet, const int& nGoodJet,
-               const float& dphi_jet0met, const float& dphi_jet1met, const int& nPV) {
-
-  FillHist1D(prefix+"nEleDiff", nEle-nGoodEle, weight);
-  FillHist1D(prefix+"nMuonDiff", nMuon-nGoodMuon, weight);
-}
-
 void setWeight(const string& wFile) {
 
   ifstream file(wFile);
@@ -389,7 +330,6 @@ void setPars(const string& parFile) {
       else isMC = false;
     }
     else if (var == "inName")  inName = line.data();
-    else if (var == "outName") outName = line.data();
     else if (var == "channel") channel = line;
   }
   file.close();

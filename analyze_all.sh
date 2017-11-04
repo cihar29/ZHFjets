@@ -47,11 +47,11 @@ for chan in "${channels[@]}" ; do
     mc="true"
     if [[ $file == *"DOUBLELEP"* ]] ; then
       mc="false"
+      continue;
     fi
 
     lines=( "isMC           ${mc}"
             "inName         ${dir}${file}.root"
-            "outName        ${chan}/${file}_${chan}.root"
             "channel        ${chan}"
             )
     out=""
