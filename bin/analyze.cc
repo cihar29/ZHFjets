@@ -1,6 +1,7 @@
 //chad harrington - 11/2/2017
 
 #include "TFile.h"
+#include "TChain.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TTree.h"
@@ -16,13 +17,16 @@
 
 using namespace std;
 
-//void FillHist1D(const TString& histName, const Double_t& value, const double& weight);
-//void FillHist2D(const TString& histName, const Double_t& value1, const Double_t& value2, const double& weight);
+void FillHist1D(const TString& histName, const Double_t& value, const double& weight);
+void FillHist2D(const TString& histName, const Double_t& value1, const Double_t& value2, const double& weight);
 void setPars(const string& parFile); 
 //void setWeight(const string& parFile); 
 
+map<TString, TH1*> m_Histos1D;
+map<TString, TH2*> m_Histos2D;
+
 bool isMC;
-TString inName;
+TString inName, outName;
 string channel;
 double weight0, weight;
 
@@ -44,8 +48,12 @@ int main(int argc, char* argv[]) {
 
   //Open Files//
 
-  TFile* inFile = TFile::Open(inName);
-  TTree* T = (TTree*) inFile->Get("tree");
+  TChain* T = new TChain("tree");
+  for (int i=1; i<2; i++)
+    T->Add(inName + "0000/tree_" + to_string(i) + ".root");
+//  for (int i=1000; i<1500; i++)
+//    T->Add(inName + "0001/tree_" + to_string(i) + ".root");
+
   Long64_t nEntries = T->GetEntries();
   cout << nEntries << " Events" << endl;
   cout << "Processing " + inName << endl;
@@ -63,6 +71,50 @@ int main(int argc, char* argv[]) {
   v_cuts[bjet]=make_pair("bJet",0.); v_cuts[cjet]=make_pair("cJet",0.); v_cuts[ljet]=make_pair("lJet",0.); v_cuts[genjetcut]=make_pair("GoodGenJet",0.);
   v_cuts[bgenjet]=make_pair("bgenjet",0.); v_cuts[cgenjet]=make_pair("cgenjet",0.); v_cuts[lgenjet]=make_pair("lgenjet",0.);
 
+  //Histograms//
+
+  TString hname = "b_genjet0";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+  hname = "c_genjet0";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+  hname = "udsg_genjet0";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+
+  hname = "b_ngenjet";
+  m_Histos1D[hname] = new TH1D(hname,hname,50,0,50);
+  hname = "c_ngenjet";
+  m_Histos1D[hname] = new TH1D(hname,hname,50,0,50);
+  hname = "udsg_ngenjet";
+  m_Histos1D[hname] = new TH1D(hname,hname,50,0,50);
+  hname = "b_njet";
+  m_Histos1D[hname] = new TH1D(hname,hname,50,0,50);
+  hname = "c_njet";
+  m_Histos1D[hname] = new TH1D(hname,hname,50,0,50);
+  hname = "udsg_njet";
+  m_Histos1D[hname] = new TH1D(hname,hname,50,0,50);
+
+  hname = "b_jet0_0";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+  hname = "c_jet0_0";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+  hname = "udsg_jet0_0";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+  hname = "b_jet0_30";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+  hname = "c_jet0_30";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+  hname = "udsg_jet0_30";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+  hname = "b_jet0_50";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+  hname = "c_jet0_50";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+  hname = "udsg_jet0_50";
+  m_Histos1D[hname] = new TH1D(hname,hname,500,0,500);
+
+  hname = "jet0_genjet0";
+  m_Histos2D[hname] = new TH2D(hname,hname,500,0,500,500,0,500);
+
   //Set Branches//
 
   int HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v, HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v,
@@ -77,29 +129,31 @@ int main(int argc, char* argv[]) {
   T->SetBranchAddress("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v", &HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v);
 
   int nLep = MAXLEP;
-  float vLeptons_new_pt[nLep], vLeptons_new_eta[nLep], vLeptons_new_phi[nLep], vLeptons_new_mass[nLep],
-        vLeptons_new_pfRelIso03[nLep], vLeptons_new_pfRelIso04[nLep], vLeptons_new_etaSc[nLep];
-  float Vtype_new;
+  float vLeptons_pt[nLep], vLeptons_eta[nLep], vLeptons_phi[nLep], vLeptons_mass[nLep],
+        vLeptons_pfRelIso03[nLep], vLeptons_pfRelIso04[nLep], vLeptons_etaSc[nLep];
+  float Vtype;
 
-  T->SetBranchAddress("vLeptons_new_pt", vLeptons_new_pt);
-  T->SetBranchAddress("vLeptons_new_eta", vLeptons_new_eta);
-  T->SetBranchAddress("vLeptons_new_phi", vLeptons_new_phi);
-  T->SetBranchAddress("vLeptons_new_mass", vLeptons_new_mass);
-  T->SetBranchAddress("vLeptons_new_pfRelIso03", vLeptons_new_pfRelIso03);
-  T->SetBranchAddress("vLeptons_new_pfRelIso04", vLeptons_new_pfRelIso04);
-  T->SetBranchAddress("vLeptons_new_etaSc", vLeptons_new_etaSc);
-  T->SetBranchAddress("Vtype_new", &Vtype_new);
+  T->SetBranchAddress("vLeptons_pt", vLeptons_pt);
+  T->SetBranchAddress("vLeptons_eta", vLeptons_eta);
+  T->SetBranchAddress("vLeptons_phi", vLeptons_phi);
+  T->SetBranchAddress("vLeptons_mass", vLeptons_mass);
+  T->SetBranchAddress("vLeptons_pfRelIso03", vLeptons_pfRelIso03);
+  T->SetBranchAddress("vLeptons_pfRelIso04", vLeptons_pfRelIso04);
+  T->SetBranchAddress("vLeptons_etaSc", vLeptons_etaSc);
+  T->SetBranchAddress("Vtype", &Vtype);
 
   int nJet = MAXJET;
-  int idxJet_passCSV_SVT[2], Jet_hadronFlavour[nJet];
-  float Jet_pt[nJet], Jet_eta[nJet], Jet_phi[nJet], Jet_mass[nJet];
+  int Jet_hadronFlavour[nJet];
+  float Jet_pt[nJet], Jet_eta[nJet], Jet_phi[nJet], Jet_mass[nJet], Jet_btagCSV[nJet], Jet_ctagVsL[nJet], Jet_ctagVsB[nJet];
 
   T->SetBranchAddress("nJet", &nJet);
-  T->SetBranchAddress("idxJet_passCSV_SVT", idxJet_passCSV_SVT);
   T->SetBranchAddress("Jet_pt", Jet_pt);
   T->SetBranchAddress("Jet_eta", Jet_eta);
   T->SetBranchAddress("Jet_phi", Jet_phi);
   T->SetBranchAddress("Jet_mass", Jet_mass);
+  T->SetBranchAddress("Jet_btagCSV", Jet_btagCSV);
+  T->SetBranchAddress("Jet_ctagVsL", Jet_ctagVsL);
+  T->SetBranchAddress("Jet_ctagVsB", Jet_ctagVsB);
 
   int nGenJet = MAXJET;
   int GenJet_numBHadrons[nGenJet], GenJet_numCHadrons[nGenJet]; //GenJet_pdgId[nGenJet];
@@ -122,60 +176,176 @@ int main(int argc, char* argv[]) {
 
   T->SetBranchAddress("met_pt", &met_pt);
 
+  //Ia cuts
+  int numgenjet=0, numjet=0, numjetmet=0, numbgenjet=0, numbjet=0, numbjetmet=0, numcgenjet=0,  numcjet=0, numcjetmet=0, numlgenjet=0,  numljet=0, numljetmet=0;
+
   //Loop Over Entries//
   time_t start = time(NULL);
 
   for (Long64_t n=0; n<nEntries; n++) {
     T->GetEntry(n);
+//if (n%1013 != 0) continue;
 
     TLorentzVector lep0, lep1;
     weight = weight0;
 
     if (channel == "mm") {
-      if (Vtype_new == 0) {
+      if (Vtype == 0) {
         v_cuts[channelcut].second += weight;
 
         if ( !HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v && !HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v &&
              !HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v && !HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v ) continue;
         v_cuts[trigcut].second += weight;
 
-        if (vLeptons_new_pt[0] < 25 || vLeptons_new_pt[1] < 25) continue;
-        if (fabs(vLeptons_new_eta[0]) > 2.4 || fabs(vLeptons_new_eta[1]) > 2.4) continue;
-        if (vLeptons_new_pfRelIso04[0] > 0.25 || vLeptons_new_pfRelIso04[1] > 0.25) continue;
+        if (vLeptons_pt[0] < 25 || vLeptons_pt[1] < 25) continue;
+        if (fabs(vLeptons_eta[0]) > 2.4 || fabs(vLeptons_eta[1]) > 2.4) continue;
+        if (vLeptons_pfRelIso04[0] > 0.25 || vLeptons_pfRelIso04[1] > 0.25) continue;
 
         v_cuts[selcut].second += weight;
       }
       else continue;
     }
     else if (channel == "ee") {
-      if (Vtype_new == 1) {
+      if (Vtype == 1) {
         v_cuts[channelcut].second += weight;
 
         if (!HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v && !HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v) continue;
         v_cuts[trigcut].second += weight;
 
-        if (vLeptons_new_pt[0] < 25 || vLeptons_new_pt[1] < 25) continue;
-        if (fabs(vLeptons_new_eta[0]) > 2.4 || fabs(vLeptons_new_eta[1]) > 2.4) continue;
-        if (1.4442 < fabs(vLeptons_new_etaSc[0]) && fabs(vLeptons_new_etaSc[0]) < 1.5660) continue;
-        if (1.4442 < fabs(vLeptons_new_etaSc[1]) && fabs(vLeptons_new_etaSc[1]) < 1.5660) continue;
-        if (vLeptons_new_pfRelIso03[0] > 0.25 || vLeptons_new_pfRelIso03[1] > 0.25) continue;
+        if (vLeptons_pt[0] < 25 || vLeptons_pt[1] < 25) continue;
+        if (fabs(vLeptons_eta[0]) > 2.4 || fabs(vLeptons_eta[1]) > 2.4) continue;
+        if (1.4442 < fabs(vLeptons_etaSc[0]) && fabs(vLeptons_etaSc[0]) < 1.5660) continue;
+        if (1.4442 < fabs(vLeptons_etaSc[1]) && fabs(vLeptons_etaSc[1]) < 1.5660) continue;
+        if (vLeptons_pfRelIso03[0] > 0.25 || vLeptons_pfRelIso03[1] > 0.25) continue;
 
         v_cuts[selcut].second += weight;
       }
       else continue;
     }
-    lep0.SetPtEtaPhiM(vLeptons_new_pt[0],vLeptons_new_eta[0],vLeptons_new_phi[0],vLeptons_new_mass[0]);
-    lep1.SetPtEtaPhiM(vLeptons_new_pt[1],vLeptons_new_eta[1],vLeptons_new_phi[1],vLeptons_new_mass[1]);
+    lep0.SetPtEtaPhiM(vLeptons_pt[0],vLeptons_eta[0],vLeptons_phi[0],vLeptons_mass[0]);
+    lep1.SetPtEtaPhiM(vLeptons_pt[1],vLeptons_eta[1],vLeptons_phi[1],vLeptons_mass[1]);
 
     double V_mass = (lep0+lep1).M();
     if (V_mass<70 || V_mass>110) continue;
     v_cuts[zjetmasscut].second += weight;
 
+    // Ia
+
+bool GenJetKin = false, BGenJetKin = false, CGenJetKin = false;
+bool plotbgenjet0 = false, plotcgenjet0 = false, plotlgenjet0 = false;
+bool plotbgenjet30 = false, plotcgenjet30 = false, plotlgenjet30 = false, plotbgenjet50 = false, plotcgenjet50 = false, plotlgenjet50 = false;
+
+int nGenJetEta = 0;
+for (int i=0; i<nGenJet; i++) {
+  if ( fabs(GenJet_eta[i])>2.4 ) continue;
+  nGenJetEta++;
+
+  if      (GenJet_numBHadrons[i] >= 1) plotbgenjet0 = true;
+  else if (GenJet_numCHadrons[i] >= 1) plotcgenjet0 = true;
+  else                                 plotlgenjet0 = true;
+
+  if ( GenJet_pt[i]<30 ) continue;
+  GenJetKin = true;
+
+  if (GenJet_numBHadrons[i] >= 1) {
+    BGenJetKin = true;  plotbgenjet30 = true;
+    if ( GenJet_pt[i]>50 ) plotbgenjet50 = true;
+  }
+  else if (GenJet_numCHadrons[i] >= 1) {
+    CGenJetKin = true;  plotcgenjet30 = true;
+    if ( GenJet_pt[i]>50 ) plotcgenjet50 = true;
+  }
+  else {
+    plotlgenjet30 = true;
+    if ( GenJet_pt[i]>50 ) plotlgenjet50 = true;
+  }
+}
+
+bool JetKin = false, plotjet = false;
+int nJetEta=0;
+for (int i=0; i<nJet; i++) {
+  if ( fabs(Jet_eta[i])>2.4 ) continue;
+  nJetEta++;
+  plotjet = true;
+
+  if ( Jet_pt[i]>30 ) JetKin = true;
+}
+
+FillHist2D("jet0_genjet0", (plotbgenjet0||plotcgenjet0||plotlgenjet0) ? GenJet_pt[0] : 0., plotjet ? Jet_pt[0] : 0., 1.);
+
+if      (plotbgenjet0) {
+  FillHist1D("b_genjet0", GenJet_pt[0], 1.);
+  FillHist1D("b_ngenjet", nGenJetEta, 1.);
+  FillHist1D("b_njet",    nJetEta, 1.);
+}
+else if (plotcgenjet0) {
+  FillHist1D("c_genjet0", GenJet_pt[0], 1.);
+  FillHist1D("c_ngenjet", nGenJetEta, 1.);
+  FillHist1D("c_njet",    nJetEta, 1.);
+}
+else if (plotlgenjet0) {
+  FillHist1D("udsg_genjet0", GenJet_pt[0], 1.);
+  FillHist1D("udsg_ngenjet", nGenJetEta, 1.);
+  FillHist1D("udsg_njet",    nJetEta, 1.);
+}
+
+if (plotjet) {
+  if      (plotbgenjet0) FillHist1D("b_jet0_0", Jet_pt[0], 1.);
+  else if (plotcgenjet0) FillHist1D("c_jet0_0", Jet_pt[0], 1.);
+  else if (plotlgenjet0) FillHist1D("udsg_jet0_0", Jet_pt[0], 1.);
+
+  if      (plotbgenjet30) FillHist1D("b_jet0_30", Jet_pt[0], 1.);
+  else if (plotcgenjet30) FillHist1D("c_jet0_30", Jet_pt[0], 1.);
+  else if (plotlgenjet30) FillHist1D("udsg_jet0_30", Jet_pt[0], 1.);
+
+  if      (plotbgenjet50) FillHist1D("b_jet0_50", Jet_pt[0], 1.);
+  else if (plotcgenjet50) FillHist1D("c_jet0_50", Jet_pt[0], 1.);
+  else if (plotlgenjet50) FillHist1D("udsg_jet0_50", Jet_pt[0], 1.);
+}
+
+if (GenJetKin){ // GenJet passes pt/eta cuts
+  numgenjet++;
+
+  if(JetKin)                numjet++;
+  if(JetKin && met_pt < 40) numjetmet++;
+
+  if(BGenJetKin){
+    numbgenjet++;
+    if(JetKin)                numbjet++;
+    if(JetKin && met_pt < 40) numbjetmet++;
+  } else if (CGenJetKin) {
+    numcgenjet++;
+    if(JetKin)                numcjet++;
+    if(JetKin && met_pt < 40) numcjetmet++;
+  }else {
+    numlgenjet++;
+    if(JetKin)                numljet++;
+    if(JetKin && met_pt < 40) numljetmet++;
+  }
+
+}
+
+    // end Ia
+
+/*
     if (met_pt > 40) continue;
     v_cuts[metcut].second += weight;
 
+    double maxpt = -1;
+    int hfidx = -1;
+    for (int i=0; i<nJet; i++) {
+
+      if ( Jet_pt[i] > 25 && Jet_pt[i] > maxpt && fabs(Jet_eta[i]) < 2.4
+           && ( Jet_btagCSV[i] >= 0.8484 || (Jet_ctagVsL[i] >= 0.69 && Jet_ctagVsB[i] >= -0.45) ) ) {
+        maxpt = Jet_pt[i];  hfidx = i;
+      }
+    }
+    if (hfidx == -1) continue;
+
+    // loop over gen jets first
+
     map<int, int> genjet_jet_idx;
-    int hfidx = idxJet_passCSV_SVT[1], genhfidx = -1;
+    int genhfidx = -1;
 
     for (int i=0; i<nJet; i++) {
       TLorentzVector jet;
@@ -235,13 +405,12 @@ int main(int argc, char* argv[]) {
       if (genhfidx >=0 ) {
         if (GenJet_pt[genhfidx]<30 || fabs(GenJet_eta[genhfidx])>2.4) continue;
 
-        //if      (abs(GenJet_pdgId[genhfidx]) == 5) v_cuts[bgenjet].second += weight;
-        //else if (abs(GenJet_pdgId[genhfidx]) == 4) v_cuts[cgenjet].second += weight;
         if      (GenJet_numBHadrons[genhfidx] >= 1) v_cuts[bgenjet].second += weight;
         else if (GenJet_numCHadrons[genhfidx] >= 1) v_cuts[cgenjet].second += weight;
         else                                        v_cuts[lgenjet].second += weight;
       }
     }
+*/
   }
   cout << difftime(time(NULL), start) << " s" << endl;
 
@@ -271,6 +440,49 @@ int main(int argc, char* argv[]) {
       cout << "---------------------------------------------------------------------------------------------------" << endl;
   }
   cout << endl;
+
+  cout << endl << "Ia" << endl;
+
+// these tells use how often event passes reco jet pt/eta cut
+// when genjet already satisfies pt/eta requirement. Per each flavor.
+
+cout << Form("%-25s %10i %10i  %1.4f", "jetkin/genjetkin",   numjet,  numgenjet,  float(numjet)/numgenjet) << endl;
+cout << Form("%-25s %10i %10i  %1.4f", "bjetkin/bgenjetkin", numbjet, numbgenjet, float(numbjet)/numbgenjet) << endl;
+cout << Form("%-25s %10i %10i  %1.4f", "cjetkin/cgenjetkin", numcjet, numcgenjet, float(numcjet)/numcgenjet) << endl;
+cout << Form("%-25s %10i %10i  %1.4f", "ljetkin/lgenjetkin", numljet, numlgenjet, float(numljet)/numlgenjet) << endl;
+
+// these tells use how often event passes met cut and reco jet pt/eta cut
+// when genjet already satisfies pt/eta requirement. Per each flavor.
+
+cout << Form("%-25s %10i %10i  %1.4f", "jetkinmet/genjetkin",   numjetmet,  numgenjet,  float(numjetmet)/numgenjet) << endl;
+cout << Form("%-25s %10i %10i  %1.4f", "bjetkinmet/bgenjetkin", numbjetmet, numbgenjet, float(numbjetmet)/numbgenjet) << endl;
+cout << Form("%-25s %10i %10i  %1.4f", "cjetkinmet/cgenjetkin", numcjetmet, numcgenjet, float(numcjetmet)/numcgenjet) << endl;
+cout << Form("%-25s %10i %10i  %1.4f", "ljetkinmet/lgenjetkin", numljetmet, numlgenjet, float(numljetmet)/numlgenjet) << endl;
+
+  TFile* outFile = new TFile(outName,"RECREATE");
+  outFile->cd();
+
+  for (map<TString, TH1*>::iterator hid = m_Histos1D.begin(); hid != m_Histos1D.end(); hid++) hid->second->Write();
+  for (map<TString, TH2*>::iterator hid = m_Histos2D.begin(); hid != m_Histos2D.end(); hid++) hid->second->Write();
+
+  delete outFile;
+  outFile = 0;
+}
+
+void FillHist1D(const TString& histName, const Double_t& value, const double& weight) {
+  map<TString, TH1*>::iterator hid=m_Histos1D.find(histName);
+  if (hid==m_Histos1D.end())
+    cout << "%FillHist1D -- Could not find histogram with name: " << histName << endl;
+  else
+    hid->second->Fill(value, weight);
+}
+
+void FillHist2D(const TString& histName, const Double_t& value1, const Double_t& value2, const double& weight) {
+  map<TString, TH2*>::iterator hid=m_Histos2D.find(histName);
+  if (hid==m_Histos2D.end())
+    cout << "%FillHist2D -- Could not find histogram with name: " << histName << endl;
+  else
+    hid->second->Fill(value1, value2, weight);
 }
 /*
 void setWeight(const string& wFile) {
@@ -329,8 +541,9 @@ void setPars(const string& parFile) {
       if (line == "true") isMC = true;
       else isMC = false;
     }
-    else if (var == "inName")  inName = line.data();
-    else if (var == "channel") channel = line;
+    else if (var == "inName")   inName = line.data();
+    else if (var == "outName")  outName = line.data();
+    else if (var == "channel")  channel = line;
   }
   file.close();
 }
