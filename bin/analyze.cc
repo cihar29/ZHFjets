@@ -80,8 +80,8 @@ int main(int argc, char* argv[]) {
       T->Add(path + "0000/tree_" + to_string(i) + ".root");
   }
   else {
-    for (int i=1; i<1000; i++)
-      T->Add(inName + "0000/tree_" + to_string(i) + ".root");
+//    for (int i=1; i<1000; i++)
+//      T->Add(inName + "0000/tree_" + to_string(i) + ".root");
     for (int i=1000; i<1455; i++)
       T->Add(inName + "0001/tree_" + to_string(i) + ".root");
   }
@@ -95,17 +95,18 @@ int main(int argc, char* argv[]) {
   //Cuts//
 
   enum Cuts{
-    channelcut, trigcut, selcut, zjetmasscut, metcut, jetcut, bjet, cjet, ljet, genjetcut, bgenjet, cgenjet, lgenjet, numCuts
+    channelcut, trigcut, selcut, zjetmasscut, metcut, jetcut, bjet, cjet, ljet, jetcut30, bjetcut30, cjetcut30, ljetcut30, numCuts
   };
   vector<pair<string, double> > v_cuts(numCuts);
 
-  v_cuts[channelcut]=make_pair("Channel",0.); v_cuts[trigcut]=make_pair("Trigger",0.); v_cuts[selcut]=make_pair("Selection",0.);
-  v_cuts[zjetmasscut]=make_pair("Z-Jet Mass",0.); v_cuts[jetcut]=make_pair("GoodJet",0.); v_cuts[metcut]=make_pair("MET",0.);
-  v_cuts[bjet]=make_pair("bJet",0.); v_cuts[cjet]=make_pair("cJet",0.); v_cuts[ljet]=make_pair("lJet",0.); v_cuts[genjetcut]=make_pair("GoodGenJet",0.);
-  v_cuts[bgenjet]=make_pair("bgenjet",0.); v_cuts[cgenjet]=make_pair("cgenjet",0.); v_cuts[lgenjet]=make_pair("lgenjet",0.);
+  v_cuts[channelcut]=make_pair("Channel",0.);     v_cuts[trigcut]=make_pair("Trigger",0.); v_cuts[selcut]=make_pair("Selection",0.);
+  v_cuts[zjetmasscut]=make_pair("Z-Jet Mass",0.); v_cuts[metcut]=make_pair("MET",0.);      v_cuts[jetcut]=make_pair("Matched Jet",0.);
+  v_cuts[bjet]=make_pair("bJet",0.);              v_cuts[cjet]=make_pair("cJet",0.);       v_cuts[ljet]=make_pair("lJet",0.);
+  v_cuts[jetcut30]=make_pair("Matched Jet, pt>30GeV",0.);
+  v_cuts[bjetcut30]=make_pair("bJetcut30",0.); v_cuts[cjetcut30]=make_pair("cJetcut30",0.); v_cuts[ljetcut30]=make_pair("lJetcut30",0.);
 
   //Histograms//
-  // Gen Tagged //
+  // Gen Tagged for acceptance study //
 
   TString hname = "b_genjet";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
@@ -114,6 +115,15 @@ int main(int argc, char* argv[]) {
   hname = "udsg_genjet";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
   hname = "incl_genjet";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_jet";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_jet";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_jet";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_jet";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
 
   hname = "b_genjet30";
@@ -134,15 +144,6 @@ int main(int argc, char* argv[]) {
   hname = "incl_jet30";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
 
-  hname = "b_jet";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "c_jet";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "udsg_jet";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "incl_jet";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-
   hname = "b_jet_genjet";
   m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
   hname = "c_jet_genjet";
@@ -152,7 +153,7 @@ int main(int argc, char* argv[]) {
   hname = "incl_jet_genjet";
   m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
 
-  // Reco tagged //
+  // Reco tagged for unfolding //
 
   hname = "b_Ljet";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
@@ -161,6 +162,42 @@ int main(int argc, char* argv[]) {
   hname = "udsg_Ljet";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
   hname = "incl_Ljet";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_Ljet_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_Ljet_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_Ljet_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_Ljet_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_Ljet_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_Ljet_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_Ljet_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_Ljet_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_Ljet_mtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_Ljet_mtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_Ljet_mtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_Ljet_mtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_Ljet_unmtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_Ljet_unmtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_Ljet_unmtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_Ljet_unmtchd30";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
 
   hname = "b_Lgenjet";
@@ -172,13 +209,58 @@ int main(int argc, char* argv[]) {
   hname = "incl_Lgenjet";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
 
-  hname = "b_Ljet_Lgenjet";
+  hname = "b_Lgenjet_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_Lgenjet_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_Lgenjet_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_Lgenjet_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_Lgenjet_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_Lgenjet_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_Lgenjet_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_Lgenjet_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_Ljet_Lgenjet_mtchd";
   m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
-  hname = "c_Ljet_Lgenjet";
+  hname = "c_Ljet_Lgenjet_mtchd";
   m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
-  hname = "udsg_Ljet_Lgenjet";
+  hname = "udsg_Ljet_Lgenjet_mtchd";
   m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
-  hname = "incl_Ljet_Lgenjet";
+  hname = "incl_Ljet_Lgenjet_mtchd";
+  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+
+  hname = "b_Lgenjet_mtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_Lgenjet_mtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_Lgenjet_mtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_Lgenjet_mtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_Lgenjet_unmtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_Lgenjet_unmtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_Lgenjet_unmtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_Lgenjet_unmtchd30";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_Ljet_Lgenjet_mtchd30";
+  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+  hname = "c_Ljet_Lgenjet_mtchd30";
+  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+  hname = "udsg_Ljet_Lgenjet_mtchd30";
+  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+  hname = "incl_Ljet_Lgenjet_mtchd30";
   m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
 
   hname = "b_Vpt";
@@ -307,7 +389,7 @@ int main(int argc, char* argv[]) {
     v_cuts[metcut].second += weight;
 
     // Gen matching //
-    map<int, bool> matched0, matched30;
+    map<int, int> matched0, matched30; //<reco idx, gen idx>
     for (int igen=0; igen<nGenJet; igen++) {
 
       TString flav = "udsg";
@@ -322,7 +404,7 @@ int main(int argc, char* argv[]) {
       int idx = -1;
       for (int ireco=0; ireco<nJet; ireco++) {
         if (fabs(Jet_eta[ireco])>2.4) continue;
-        if (matched0[ireco]) continue;  // this jet is already matched to a genjet
+        if ( matched0.find(ireco) != matched0.end() ) continue;  // this jet is already matched to a genjet
 
         TLorentzVector jet;
         jet.SetPtEtaPhiM(Jet_pt[ireco], Jet_eta[ireco], Jet_phi[ireco], Jet_mass[ireco]);
@@ -334,7 +416,8 @@ int main(int argc, char* argv[]) {
         }
       }
       if (idx != -1) {
-        matched0[idx] = true;
+        matched0[idx] = igen;
+
         FillHist1D(flav + "_genjet", GenJet_pt[igen], weight);
         FillHist1D(flav + "_jet", Jet_pt[idx], weight);
         FillHist1D("incl_genjet", GenJet_pt[igen], weight);
@@ -342,11 +425,12 @@ int main(int argc, char* argv[]) {
       }
 
       // cut on pt<30 GeV //
+      // for acceptance studies //
       rmin = 99.;
       idx = -1;
       for (int ireco=0; ireco<nJet; ireco++) {
         if (Jet_pt[ireco]<30 || fabs(Jet_eta[ireco])>2.4) continue;
-        if (matched30[ireco]) continue;  // this jet is already matched to a genjet
+        if ( matched30.find(ireco) != matched30.end() ) continue;  // this jet is already matched to a genjet
 
         TLorentzVector jet;
         jet.SetPtEtaPhiM(Jet_pt[ireco], Jet_eta[ireco], Jet_phi[ireco], Jet_mass[ireco]);
@@ -358,7 +442,8 @@ int main(int argc, char* argv[]) {
         }
       }
       if (idx != -1) {
-        matched30[idx] = true;
+        matched30[idx] = igen;
+
         FillHist1D(flav + "_genjet30", GenJet_pt[igen], weight);
         FillHist1D(flav + "_jet30", Jet_pt[idx], weight);
         FillHist2D(flav + "_jet_genjet", GenJet_pt[igen], Jet_pt[idx], weight);
@@ -373,31 +458,89 @@ int main(int argc, char* argv[]) {
     int idx = -1;
     double ptmax = -1;
     for (int ireco=0; ireco<nJet; ireco++) {
-      if (Jet_pt[ireco]<30 || fabs(Jet_eta[ireco])>2.4) continue;
+      if (fabs(Jet_eta[ireco])>2.4) continue;
       if (Jet_pt[ireco]>ptmax) {
         ptmax = Jet_pt[ireco];
         idx = ireco;
       }
     }
 
+    // We have a reco jet
     if (idx != -1) {
       TString flav = "udsg";
       if      (Jet_hadronFlavour[idx] == 5) flav = "b";
       else if (Jet_hadronFlavour[idx] == 4) flav = "c";
 
-      double V_pt = (lep0+lep1).Pt();
-      FillHist1D(flav + "_Vpt", V_pt, weight);
       FillHist1D(flav + "_Ljet", Jet_pt[idx], weight);
-      FillHist1D(flav + "_Lgenjet", GenJet_pt[0], weight); //or use matched?
-      FillHist2D(flav + "_Ljet_Lgenjet", GenJet_pt[0], Jet_pt[idx], weight); //or use matched?
-
-      FillHist1D("incl_Vpt", V_pt, weight);
       FillHist1D("incl_Ljet", Jet_pt[idx], weight);
-      FillHist1D("incl_Lgenjet", GenJet_pt[0], weight); //or use matched?
-      FillHist2D("incl_Ljet_Lgenjet", GenJet_pt[0], Jet_pt[idx], weight); //or use matched?
+
+      if (nGenJet > 0) {
+        FillHist1D(flav + "_Lgenjet", GenJet_pt[0], weight);
+        FillHist1D("incl_Lgenjet", GenJet_pt[0], weight);
+      }
+
+      if (Jet_pt[idx] > 30) {
+        double V_pt = (lep0+lep1).Pt();
+        FillHist1D(flav + "_Vpt", V_pt, weight);
+        FillHist1D("incl_Vpt", V_pt, weight);
+      }
+
+      // This reco jet is matched to a gen jet
+      if (matched0.find(idx) != matched0.end()) {
+        int genidx = matched0[idx];
+
+        FillHist1D(flav + "_Ljet_mtchd", Jet_pt[idx], weight);
+        FillHist1D("incl_Ljet_mtchd", Jet_pt[idx], weight);
+
+        FillHist1D(flav + "_Lgenjet_mtchd", GenJet_pt[genidx], weight);
+        FillHist1D("incl_Lgenjet_mtchd", GenJet_pt[genidx], weight);
+
+        FillHist2D(flav + "_Ljet_Lgenjet_mtchd", GenJet_pt[genidx], Jet_pt[idx], weight);
+        FillHist2D("incl_Ljet_Lgenjet_mtchd", GenJet_pt[genidx], Jet_pt[idx], weight);
+      }
+      else {
+        FillHist1D(flav + "_Ljet_unmtchd", Jet_pt[idx], weight);
+        FillHist1D("incl_Ljet_unmtchd", Jet_pt[idx], weight);
+
+        if (nGenJet > 0) {
+          FillHist1D(flav + "_Lgenjet_unmtchd", GenJet_pt[0], weight);
+          FillHist1D("incl_Lgenjet_unmtchd", GenJet_pt[0], weight);
+        }
+      }
+      if (matched30.find(idx) != matched30.end()) {
+        int genidx = matched30[idx];
+
+        FillHist1D(flav + "_Ljet_mtchd30", Jet_pt[idx], weight);
+        FillHist1D("incl_Ljet_mtchd30", Jet_pt[idx], weight);
+
+        FillHist1D(flav + "_Lgenjet_mtchd30", GenJet_pt[genidx], weight);
+        FillHist1D("incl_Lgenjet_mtchd30", GenJet_pt[genidx], weight);
+
+        FillHist2D(flav + "_Ljet_Lgenjet_mtchd30", GenJet_pt[genidx], Jet_pt[idx], weight);
+        FillHist2D("incl_Ljet_Lgenjet_mtchd30", GenJet_pt[genidx], Jet_pt[idx], weight);
+      }
+      else {
+        FillHist1D(flav + "_Ljet_unmtchd30", Jet_pt[idx], weight);
+        FillHist1D("incl_Ljet_unmtchd30", Jet_pt[idx], weight);
+
+        if (nGenJet > 0) {
+          FillHist1D(flav + "_Lgenjet_unmtchd30", GenJet_pt[0], weight);
+          FillHist1D("incl_Lgenjet_unmtchd30", GenJet_pt[0], weight);
+        }
+      }
     }
   }
   cout << difftime(time(NULL), start) << " s" << endl;
+
+  v_cuts[jetcut].second = m_Histos1D["incl_jet"]->Integral();
+  v_cuts[bjet].second = m_Histos1D["b_jet"]->Integral();
+  v_cuts[cjet].second = m_Histos1D["c_jet"]->Integral();
+  v_cuts[ljet].second = m_Histos1D["udsg_jet"]->Integral();
+
+  v_cuts[jetcut30].second = m_Histos1D["incl_jet30"]->Integral();
+  v_cuts[bjetcut30].second = m_Histos1D["b_jet30"]->Integral();
+  v_cuts[cjetcut30].second = m_Histos1D["c_jet30"]->Integral();
+  v_cuts[ljetcut30].second = m_Histos1D["udsg_jet30"]->Integral();
 
   //Cutflow Table//
   cout<<"===================================================================================================\n";
@@ -411,9 +554,12 @@ int main(int argc, char* argv[]) {
       cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
                    v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[0].second) << endl;
 
-    else if (i>genjetcut)
+    else if (i==jetcut30)
       cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
-                   v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[genjetcut].second) << endl;
+                   v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[metcut].second) << endl;
+    else if (i>jetcut30)
+      cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
+                   v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[jetcut30].second) << endl;
     else if (i>jetcut)
       cout << Form("%-25s |||       %12.1f       |||       %1.6f (%1.4f)",
                    v_cuts[i].first.data(), v_cuts[i].second, v_cuts[i].second/v_cuts[0].second, v_cuts[i].second/v_cuts[jetcut].second) << endl;
