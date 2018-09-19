@@ -32,7 +32,16 @@ string channel;
 double xs, lumi, posWgt, negWgt;
 
 const int MAXJET = 50;
-const int MAXLEP = 2;
+const int MAXLEP = 4;
+
+vector<double> genbins =  {30, 40, 50, 60, 80, 110, 140, 200};                                    //Jet pt
+vector<double> recobins = {30, 35, 40, 45, 50, 55, 60, 70, 80, 95, 110, 125, 140, 170, 200, 250}; //Jet pt
+//vector<double> recobins = {30, 35, 40, 45, 50, 55, 60, 70, 80, 95, 110, 125, 140, 170, 200}; //Jet pt
+
+vector<double> genbins2 = {0, 20, 30, 40, 50, 70, 90, 120, 200};                                         //Vpt
+vector<double> recobins2 = {0, 10, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 105, 120, 160, 200, 250}; //Vpt
+//vector<double> recobins2 = {0, 10, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 105, 120, 160, 200}; //Vpt
+float max_val = 225;
 
 int main(int argc, char* argv[]) {
 
@@ -80,8 +89,8 @@ int main(int argc, char* argv[]) {
       T->Add(path + "0000/tree_" + to_string(i) + ".root");
   }
   else {
-//    for (int i=1; i<1000; i++)
-//      T->Add(inName + "0000/tree_" + to_string(i) + ".root");
+    for (int i=1; i<1000; i++)
+      T->Add(inName + "0000/tree_" + to_string(i) + ".root");
     for (int i=1000; i<1455; i++)
       T->Add(inName + "0001/tree_" + to_string(i) + ".root");
   }
@@ -173,33 +182,6 @@ int main(int argc, char* argv[]) {
   hname = "incl_Ljet_mtchd";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
 
-  hname = "b_Ljet_unmtchd";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "c_Ljet_unmtchd";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "udsg_Ljet_unmtchd";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "incl_Ljet_unmtchd";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-
-  hname = "b_Ljet_mtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "c_Ljet_mtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "udsg_Ljet_mtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "incl_Ljet_mtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-
-  hname = "b_Ljet_unmtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "c_Ljet_unmtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "udsg_Ljet_unmtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "incl_Ljet_unmtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-
   hname = "b_Lgenjet";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
   hname = "c_Lgenjet";
@@ -227,41 +209,23 @@ int main(int argc, char* argv[]) {
   hname = "incl_Lgenjet_unmtchd";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
 
-  hname = "b_Ljet_Lgenjet_mtchd";
-  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
-  hname = "c_Ljet_Lgenjet_mtchd";
-  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
-  hname = "udsg_Ljet_Lgenjet_mtchd";
-  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
-  hname = "incl_Ljet_Lgenjet_mtchd";
-  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+//  hname = "b_Ljet_Lgenjet_mtchd";
+//  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+//  hname = "c_Ljet_Lgenjet_mtchd";
+//  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+//  hname = "udsg_Ljet_Lgenjet_mtchd";
+//  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+//  hname = "incl_Ljet_Lgenjet_mtchd";
+//  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
 
-  hname = "b_Lgenjet_mtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "c_Lgenjet_mtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "udsg_Lgenjet_mtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "incl_Lgenjet_mtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-
-  hname = "b_Lgenjet_unmtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "c_Lgenjet_unmtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "udsg_Lgenjet_unmtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-  hname = "incl_Lgenjet_unmtchd30";
-  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
-
-  hname = "b_Ljet_Lgenjet_mtchd30";
-  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
-  hname = "c_Ljet_Lgenjet_mtchd30";
-  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
-  hname = "udsg_Ljet_Lgenjet_mtchd30";
-  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
-  hname = "incl_Ljet_Lgenjet_mtchd30";
-  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+  hname = "b_Ljet_Lgenjet";
+  m_Histos2D[hname] = new TH2D(hname,hname, genbins.size()-1, &genbins[0], recobins.size()-1, &recobins[0]);
+  hname = "c_Ljet_Lgenjet";
+  m_Histos2D[hname] = new TH2D(hname,hname, genbins.size()-1, &genbins[0], recobins.size()-1, &recobins[0]);
+  hname = "udsg_Ljet_Lgenjet";
+  m_Histos2D[hname] = new TH2D(hname,hname, genbins.size()-1, &genbins[0], recobins.size()-1, &recobins[0]);
+  hname = "incl_Ljet_Lgenjet";
+  m_Histos2D[hname] = new TH2D(hname,hname, genbins.size()-1, &genbins[0], recobins.size()-1, &recobins[0]);
 
   hname = "b_Vpt";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
@@ -271,6 +235,51 @@ int main(int argc, char* argv[]) {
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
   hname = "incl_Vpt";
   m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_Vpt_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_Vpt_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_Vpt_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_Vpt_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_genVpt_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_genVpt_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_genVpt_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_genVpt_mtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+  hname = "b_genVpt_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "c_genVpt_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "udsg_genVpt_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+  hname = "incl_genVpt_unmtchd";
+  m_Histos1D[hname] = new TH1D(hname,hname,100,0,500);
+
+//  hname = "b_Vpt_genVpt_mtchd";
+//  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+//  hname = "c_Vpt_genVpt_mtchd";
+//  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+//  hname = "udsg_Vpt_genVpt_mtchd";
+//  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+//  hname = "incl_Vpt_genVpt_mtchd";
+//  m_Histos2D[hname] = new TH2D(hname,hname,100,0,500,100,0,500);
+
+  hname = "b_Vpt_genVpt";
+  m_Histos2D[hname] = new TH2D(hname,hname, genbins2.size()-1, &genbins2[0], recobins2.size()-1, &recobins2[0]);
+  hname = "c_Vpt_genVpt";
+  m_Histos2D[hname] = new TH2D(hname,hname, genbins2.size()-1, &genbins2[0], recobins2.size()-1, &recobins2[0]);
+  hname = "udsg_Vpt_genVpt";
+  m_Histos2D[hname] = new TH2D(hname,hname, genbins2.size()-1, &genbins2[0], recobins2.size()-1, &recobins2[0]);
+  hname = "incl_Vpt_genVpt";
+  m_Histos2D[hname] = new TH2D(hname,hname, genbins2.size()-1, &genbins2[0], recobins2.size()-1, &recobins2[0]);
 
   //Set Branches//
 
@@ -317,6 +326,9 @@ int main(int argc, char* argv[]) {
   int GenJet_numBHadrons[nGenJet], GenJet_numCHadrons[nGenJet]; //GenJet_pdgId[nGenJet];
   float GenJet_pt[nGenJet], GenJet_eta[nGenJet], GenJet_phi[nGenJet], GenJet_mass[nGenJet];
 
+  int nGenLep = MAXLEP;
+  float GenLep_pt[nGenLep], GenLep_eta[nGenLep], GenLep_phi[nGenLep], GenLep_mass[nGenLep];
+
   if (isMC) {
     T->SetBranchAddress("Jet_hadronFlavour", Jet_hadronFlavour);
 
@@ -328,6 +340,12 @@ int main(int argc, char* argv[]) {
     //T->SetBranchAddress("GenJet_pdgId", GenJet_pdgId);
     T->SetBranchAddress("GenJet_numBHadrons", GenJet_numBHadrons);
     T->SetBranchAddress("GenJet_numCHadrons", GenJet_numCHadrons);
+
+    T->SetBranchAddress("nGenLep", &nGenLep);
+    T->SetBranchAddress("GenLep_pt", GenLep_pt);
+    T->SetBranchAddress("GenLep_eta", GenLep_eta);
+    T->SetBranchAddress("GenLep_phi", GenLep_phi);
+    T->SetBranchAddress("GenLep_mass", GenLep_mass);
   }
 
   float met_pt, puWeight, genWeight;
@@ -423,7 +441,7 @@ int main(int argc, char* argv[]) {
         FillHist1D("incl_genjet", GenJet_pt[igen], weight);
         FillHist1D("incl_jet", Jet_pt[idx], weight);
       }
-
+/*
       // cut on pt<30 GeV //
       // for acceptance studies //
       rmin = 99.;
@@ -451,84 +469,127 @@ int main(int argc, char* argv[]) {
         FillHist1D("incl_genjet30", GenJet_pt[igen], weight);
         FillHist1D("incl_jet30", Jet_pt[idx], weight);
         FillHist2D("incl_jet_genjet", GenJet_pt[igen], Jet_pt[idx], weight);
-      }
+      }*/
     }
 
     // Reco flavor //
     int idx = -1;
     double ptmax = -1;
+    TString flav = "udsg";
+
     for (int ireco=0; ireco<nJet; ireco++) {
-      if (fabs(Jet_eta[ireco])>2.4) continue;
-      if (Jet_pt[ireco]>ptmax) {
+      if ( fabs(Jet_eta[ireco])>2.4 ) continue;
+
+      if      ( Jet_hadronFlavour[ireco]==5 )                flav = "b";
+      else if ( flav != "b" && Jet_hadronFlavour[ireco]==4 ) flav = "c";
+
+      if ( Jet_pt[ireco]>ptmax ) {
         ptmax = Jet_pt[ireco];
         idx = ireco;
       }
     }
 
-    // We have a reco jet
+    // We have the leading reco jet within eta acceptance
     if (idx != -1) {
-      TString flav = "udsg";
-      if      (Jet_hadronFlavour[idx] == 5) flav = "b";
-      else if (Jet_hadronFlavour[idx] == 4) flav = "c";
-
-      FillHist1D(flav + "_Ljet", Jet_pt[idx], weight);
-      FillHist1D("incl_Ljet", Jet_pt[idx], weight);
+      //FillHist1D(flav + "_Ljet", Jet_pt[idx], weight);
+      //FillHist1D("incl_Ljet", Jet_pt[idx], weight);
+      FillHist1D(flav + "_Ljet", std::min(Jet_pt[idx],max_val), weight);
+      FillHist1D("incl_Ljet", std::min(Jet_pt[idx],max_val), weight);
 
       if (nGenJet > 0) {
         FillHist1D(flav + "_Lgenjet", GenJet_pt[0], weight);
         FillHist1D("incl_Lgenjet", GenJet_pt[0], weight);
       }
 
-      if (Jet_pt[idx] > 30) {
-        double V_pt = (lep0+lep1).Pt();
-        FillHist1D(flav + "_Vpt", V_pt, weight);
-        FillHist1D("incl_Vpt", V_pt, weight);
-      }
-
-      // This reco jet is matched to a gen jet
-      if (matched0.find(idx) != matched0.end()) {
+      // This reco jet is matched to a gen jet, reco underflow reserved for unmatched jets
+      if ( matched0.find(idx) != matched0.end() && Jet_pt[idx]>30 ) {
         int genidx = matched0[idx];
 
-        FillHist1D(flav + "_Ljet_mtchd", Jet_pt[idx], weight);
-        FillHist1D("incl_Ljet_mtchd", Jet_pt[idx], weight);
+        FillHist1D(flav + "_Ljet_mtchd", std::min(Jet_pt[idx],max_val), weight);
+        FillHist1D("incl_Ljet_mtchd", std::min(Jet_pt[idx],max_val), weight);
 
         FillHist1D(flav + "_Lgenjet_mtchd", GenJet_pt[genidx], weight);
         FillHist1D("incl_Lgenjet_mtchd", GenJet_pt[genidx], weight);
 
-        FillHist2D(flav + "_Ljet_Lgenjet_mtchd", GenJet_pt[genidx], Jet_pt[idx], weight);
-        FillHist2D("incl_Ljet_Lgenjet_mtchd", GenJet_pt[genidx], Jet_pt[idx], weight);
+        FillHist2D(flav + "_Ljet_Lgenjet", GenJet_pt[genidx], std::min(Jet_pt[idx],max_val), weight);
+        FillHist2D("incl_Ljet_Lgenjet", GenJet_pt[genidx], std::min(Jet_pt[idx],max_val), weight);
       }
-      else {
-        FillHist1D(flav + "_Ljet_unmtchd", Jet_pt[idx], weight);
-        FillHist1D("incl_Ljet_unmtchd", Jet_pt[idx], weight);
+      else if ( matched0.find(idx) == matched0.end() && GenJet_pt[0]>30 ) {
 
-        if (nGenJet > 0) {
-          FillHist1D(flav + "_Lgenjet_unmtchd", GenJet_pt[0], weight);
-          FillHist1D("incl_Lgenjet_unmtchd", GenJet_pt[0], weight);
+        FillHist1D(flav + "_Lgenjet_unmtchd", GenJet_pt[0], weight);
+        FillHist1D("incl_Lgenjet_unmtchd", GenJet_pt[0], weight);
+
+        FillHist2D(flav + "_Ljet_Lgenjet", GenJet_pt[0], 0, weight);
+        FillHist2D("incl_Ljet_Lgenjet", GenJet_pt[0], 0, weight);
+      }
+
+      ////////////////////Vpt
+      if (Jet_pt[idx] > 30) {
+        float V_pt = (lep0+lep1).Pt();
+
+        //FillHist1D(flav + "_Vpt", V_pt, weight);
+        //FillHist1D("incl_Vpt", V_pt, weight);
+        FillHist1D(flav + "_Vpt", std::min(V_pt,max_val), weight);
+        FillHist1D("incl_Vpt", std::min(V_pt,max_val), weight);
+
+        if ( nGenLep >= 2) {
+          //Lep matching
+          map<int, int> matched = { {0,-1}, {1,-1} }; //<reco idx, gen idx>
+          //this is sloppy but w/e
+          vector< TLorentzVector > v_gLep;
+          for (int i=0; i<nGenLep; i++) {
+
+            TLorentzVector gLep;
+            gLep.SetPtEtaPhiM( GenLep_pt[i], GenLep_eta[i], GenLep_phi[i], GenLep_mass[i] );
+            v_gLep.push_back( gLep );
+
+            double rmin = 99.;
+            int idx = -1;
+
+            double dR = lep0.DeltaR( gLep );
+            if ( dR<rmin && dR<0.2 && matched[0]==-1) {
+              rmin = dR;
+              idx = 0;
+            }
+
+            dR = lep1.DeltaR( gLep );
+            if ( dR<rmin && dR<0.2 && matched[1]==-1 ) {
+              rmin = dR;
+              idx = 1;
+            }
+
+            if (idx != -1) matched[idx] = i;
+          }
+
+          //both reco leps are matched
+          if ( matched[0]!=-1 && matched[1]!=-1 ) {
+
+            float genVpt = (v_gLep[ matched[0] ] + v_gLep[ matched[1] ]).Pt();
+
+            FillHist1D(flav + "_Vpt_mtchd", std::min(V_pt,max_val), weight);
+            FillHist1D("incl_Vpt_mtchd", std::min(V_pt,max_val), weight);
+
+            FillHist1D(flav + "_genVpt_mtchd", genVpt, weight);
+            FillHist1D("incl_genVpt_mtchd", genVpt, weight);
+
+            FillHist2D(flav + "_Vpt_genVpt", genVpt, std::min(V_pt,max_val), weight);
+            FillHist2D("incl_Vpt_genVpt", genVpt, std::min(V_pt,max_val), weight);
+          }
+          else {
+
+            float genVpt = (v_gLep[0] + v_gLep[1]).Pt();
+
+            FillHist1D(flav + "_genVpt_unmtchd", genVpt, weight);
+            FillHist1D("incl_genVpt_unmtchd", genVpt, weight);
+
+            FillHist2D(flav + "_Vpt_genVpt", genVpt, 0, weight);
+            FillHist2D("incl_Vpt_genVpt", genVpt, 0, weight);
+          }
         }
       }
-      if (matched30.find(idx) != matched30.end()) {
-        int genidx = matched30[idx];
-
-        FillHist1D(flav + "_Ljet_mtchd30", Jet_pt[idx], weight);
-        FillHist1D("incl_Ljet_mtchd30", Jet_pt[idx], weight);
-
-        FillHist1D(flav + "_Lgenjet_mtchd30", GenJet_pt[genidx], weight);
-        FillHist1D("incl_Lgenjet_mtchd30", GenJet_pt[genidx], weight);
-
-        FillHist2D(flav + "_Ljet_Lgenjet_mtchd30", GenJet_pt[genidx], Jet_pt[idx], weight);
-        FillHist2D("incl_Ljet_Lgenjet_mtchd30", GenJet_pt[genidx], Jet_pt[idx], weight);
-      }
-      else {
-        FillHist1D(flav + "_Ljet_unmtchd30", Jet_pt[idx], weight);
-        FillHist1D("incl_Ljet_unmtchd30", Jet_pt[idx], weight);
-
-        if (nGenJet > 0) {
-          FillHist1D(flav + "_Lgenjet_unmtchd30", GenJet_pt[0], weight);
-          FillHist1D("incl_Lgenjet_unmtchd30", GenJet_pt[0], weight);
-        }
-      }
+      ////////////////////End Vpt
     }
+
   }
   cout << difftime(time(NULL), start) << " s" << endl;
 
