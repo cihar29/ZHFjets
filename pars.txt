@@ -1,0 +1,4 @@
+isMC     true
+inName   amcnlo
+outName  test.root
+channel  mm
